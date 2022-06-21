@@ -1,2 +1,2 @@
-.package-lock.json
-.prettierrc
+.prettierrc*
+package-lock.json*
