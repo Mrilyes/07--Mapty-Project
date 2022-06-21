@@ -1,0 +1,20 @@
+{
+  "name": "mapty",
+  "version": "1.0.0",
+  "default": "index.html",
+  "description": "Creating a mapty project based on OOP ",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mrilyes/Mapty.git"
+  },
+  "author": "Ilyes GH",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mrilyes/Mapty/issues"
+  },
+  "homepage": "https://github.com/Mrilyes/Mapty#readme"
+}
