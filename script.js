@@ -114,16 +114,41 @@ class App {
 
   _newWorkout(e) {
     e.preventDefault();
-    // console.log(this);
-    // clear input fields
-    inputDistance.value =
-      inputDuration.value =
-      inputCadence.value =
-      inputElevation.value =
-        '';
 
-    // display the marker
-    // console.log(this.#mapEvent);
+    // clean code for "guard clause":
+    const validInput = (...inputs) => {
+      inputs.every(inp => Number.isFinite(inp));
+    };
+
+    // Get data from form
+    const type = inputType.value;
+    const distance = +inputDistance.value; // (+) is to convert it to a number
+    const duration = +inputDuration.value;
+
+    // If activity running , create running object
+    if (type === 'running') {
+      const cadence = +inputCadence.value;
+      // Check if data is valid
+      // this is a "guard clause" means that we will check for the opposite of what we are originally interested in and if that opposite is true then will return the function immediately (this is a trait of modern js kind of trend)
+      // changing guard clause with clean code
+      if (!validInput(distance, duration, cadence))
+        // if (
+        //   !Number.isFinite(distance) ||
+        //   !Number.isFinite(duration) ||
+        //   !Number.isFinite(cadence)
+        // )
+        return alert('Inputs have to be positive numbers!');
+    }
+
+    // If activity cycling , create cycling object
+    if (type === 'cycling') {
+      const elevation = +inputElevation.value;
+      // Check if data is valid
+      if (!validInput(distance, duration, elevation))
+        return alert('Inputs have to be positive numbers!');
+    }
+
+    // Add new object to workout array
     const { lat, lng } = this.#mapEvent.latlng;
     L.marker([lat, lng])
       .addTo(this.#map)
@@ -138,6 +163,21 @@ class App {
       )
       .setPopupContent('Workout')
       .openPopup();
+
+    // Render workout on list
+
+    // hide form + clear input fields
+
+    // console.log(this);
+    // clear input fields
+    inputDistance.value =
+      inputDuration.value =
+      inputCadence.value =
+      inputElevation.value =
+        '';
+
+    // display the marker
+    // console.log(this.#mapEvent);
   }
 }
 const app = new App();
