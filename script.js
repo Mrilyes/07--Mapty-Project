@@ -12,10 +12,10 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class Workout {
   date = new Date();
-
   // id = (new Date() + '').slice(-10);
   id = (Date.now() + '').slice(-10);
-
+  // id = Date.now() + '';
+  clicks = 0;
   constructor(coords, distance, duration) {
     this.coords = coords; // [lat , lng]
     this.distance = distance; // in km
@@ -28,6 +28,9 @@ class Workout {
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
       months[this.date.getMonth()]
     }, ${this.date.getDate()}`;
+  }
+  _click() {
+    this.clicks++;
   }
 }
 
@@ -70,6 +73,7 @@ class Cycling extends Workout {
 // APPLICATION ARCHITECTURE
 class App {
   #map;
+  #mapZoomLevel = 18;
   #mapEvent;
   #workouts = [];
 
@@ -78,6 +82,7 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     // if type is cycling
     inputType.addEventListener('change', this._toggleElevationField.bind(this));
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
 
   _getPosition() {
@@ -102,7 +107,7 @@ class App {
 
     const coords = [latitude, longitude];
 
-    this.#map = L.map('map').setView(coords, 15);
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
     // console.log(map);
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       // maxZoom: 19,
@@ -222,8 +227,7 @@ class App {
       )
       .setPopupContent(
         `${workout.type === 'running' ? '🏃‍♂️' : '🚲'} ${workout.description} `
-      )
-      .openPopup();
+      );
   }
 
   _renderWorkout(workout) {
@@ -274,5 +278,26 @@ class App {
 
     form.insertAdjacentHTML('afterend', html);
   }
+  _moveToPopup(e) {
+    // closest is the opposite of querySelector which will take the classe or id and the scope elements
+    const workoutEl = e.target.closest('.workout');
+    console.log(workoutEl);
+    if (!workoutEl) return;
+
+    const workout = this.#workouts.find(
+      work => work.id === workoutEl.dataset.id
+    );
+    console.log(workout);
+
+    this.#map.setView(workout.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
+    // using the public interface
+    workout._click();
+  }
 }
+
 const app = new App();
