@@ -15,7 +15,7 @@ class Workout {
   // id = (new Date() + '').slice(-10);
   id = (Date.now() + '').slice(-10);
   // id = Date.now() + '';
-  clicks = 0;
+  // clicks = 0;
   constructor(coords, distance, duration) {
     this.coords = coords; // [lat , lng]
     this.distance = distance; // in km
@@ -29,9 +29,9 @@ class Workout {
       months[this.date.getMonth()]
     }, ${this.date.getDate()}`;
   }
-  _click() {
-    this.clicks++;
-  }
+  // _click() {
+  //   this.clicks++;
+  // }
 }
 
 class Running extends Workout {
@@ -78,7 +78,10 @@ class App {
   #workouts = [];
 
   constructor() {
+    // get user position
     this._getPosition();
+    // get data from local storage
+    this._getLocalStorage();
     form.addEventListener('submit', this._newWorkout.bind(this));
     // if type is cycling
     inputType.addEventListener('change', this._toggleElevationField.bind(this));
@@ -115,6 +118,13 @@ class App {
     }).addTo(this.#map);
     // the on() method is generated from leaflet library it replace the event listener
     this.#map.on('click', this._showForm.bind(this));
+
+    // callign the renderworkoutmarker in loadmap function to integrate with getlocationStorage
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work);
+    });
+    // using the public interface
+    // workout._click();
   }
   _showForm(mapE) {
     // I copy mapE to the global variable to get access to the next event listener
@@ -130,7 +140,6 @@ class App {
       inputCadence.value =
       inputElevation.value =
         '';
-
     form.style.display = 'none';
     form.classList.add('hidden');
     // while clicking on the map to show the form
@@ -146,6 +155,7 @@ class App {
     e.preventDefault();
 
     // clean code for "guard clause" using rest pattern:
+    // isFinite : The isFinite function examines the number in its argument. If the argument is NaN , positive infinity, or negative infinity, this method returns false ; otherwise, it returns true
     const validInputs = (...inputs) =>
       inputs.every(inp => Number.isFinite(inp));
 
@@ -192,7 +202,7 @@ class App {
 
     // Add new object to workout array
     this.#workouts.push(workout);
-    console.log(workout);
+    // console.log(workout);
     // Render workout on map as marker
     this._renderWorkoutMarker(workout);
 
@@ -202,15 +212,9 @@ class App {
     // hide form + clear input fields
     this._hideForm();
     // console.log(this);
-    // clear input fields
-    inputDistance.value =
-      inputDuration.value =
-      inputCadence.value =
-      inputElevation.value =
-        '';
 
-    // display the marker
-    // console.log(this.#mapEvent);
+    // set local storage to all workouts
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -281,13 +285,13 @@ class App {
   _moveToPopup(e) {
     // closest is the opposite of querySelector which will take the classe or id and the scope elements
     const workoutEl = e.target.closest('.workout');
-    console.log(workoutEl);
+    // console.log(workoutEl);
     if (!workoutEl) return;
 
     const workout = this.#workouts.find(
       work => work.id === workoutEl.dataset.id
     );
-    console.log(workout);
+    // console.log(workout);
 
     this.#map.setView(workout.coords, this.#mapZoomLevel, {
       animate: true,
@@ -295,9 +299,29 @@ class App {
         duration: 1,
       },
     });
-    // using the public interface
-    workout._click();
+  }
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    // console.log(data);
+    if (!data) return;
+
+    this.#workouts = data;
+
+    this.#workouts.forEach(work => {
+      this._renderWorkout(work);
+    });
+  }
+  reset() {
+    // to reset all the workouts from the local storage
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
 const app = new App();
+
+// remark : when we converted the objects to string and then get back from string to objects we lost the prototype chain which will not get the methods of the inherit classes that is the reason why workout.click() is not a function anymore that's why I will disable it .
+// --> This is a big problem while working with OOP and local storage
